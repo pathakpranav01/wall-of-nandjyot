@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#f3f0e9">
+  <title>Wall of Nandjyot</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Eagle+Lake&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="site-header">
+  <div class="identity">
+    <h1><span class="wall-of">Wall of</span> <span class="nandjyot">Nandjyot</span></h1>
+    <p>A quiet corner for poems, photographs &amp; passing moments.</p>
+  </div>
+  <nav class="filters" aria-label="Artwork categories">
+    <button class="filter active" data-filter="all">All <i>|</i> सर्व</button>
+    <button class="filter" data-filter="words">Poetry <i>|</i> कविता</button>
+    <button class="filter" data-filter="photos">Photography <i>|</i> छायाचित्रण</button>
+  </nav>
+</header>
+
+<main class="wall">
+  <article class="piece" data-kind="photos">
+    <button class="art-button" aria-label="Open artwork: एक संध्याकाळ अशीही">
+      <img src="assets/ek-sandhyakal-ashi-hi.png" alt="एक संध्याकाळ अशीही">
+    </button>
+  </article>
+  <article class="piece" data-kind="words">
+    <button class="art-button" aria-label="Open artwork: तेजाचे अभय">
+      <img src="assets/tejache-abhay.jpeg" alt="तेजाचे अभय">
+    </button>
+  </article>
+  <article class="piece landscape" data-kind="photos">
+    <button class="art-button" aria-label="Open landscape photograph">
+      <img src="assets/passing-moment-drops.png" alt="A close landscape photograph of water droplets reflecting a golden-blue scene">
+    </button>
+  </article>
+  <article class="piece" data-kind="photos">
+    <button class="art-button" aria-label="Open photograph of blue sky, clouds and a green tree">
+      <img src="assets/blue-sky-clouds-tree.png" alt="A vivid blue sky with white clouds above the crown of a green tree">
+    </button>
+  </article>
+</main>
+
+<footer>© Wall of Nandjyot</footer>
+
+<dialog id="viewer">
+  <button id="close" class="close" aria-label="Close">×</button>
+  <div class="viewer-stage"><img id="viewer-image" alt=""></div>
+</dialog>
+<script src="script.js"></script>
+</body></html>
