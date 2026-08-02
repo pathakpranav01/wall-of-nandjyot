@@ -101,7 +101,8 @@ closeButton.addEventListener('click', e => {
   closeViewer();
 });
 
-// First tap can reveal the unobtrusive close control; another tap hides it.
+// Tap the artwork to bring back both the close control and © Nandjyot.
+// If they are already visible, a tap lets the artwork become clean immediately.
 stage.addEventListener('click', () => {
   if (viewer.classList.contains('controls-visible')) hideControls();
   else showControls(true);
@@ -158,3 +159,11 @@ document.querySelectorAll('.filter').forEach(button => button.addEventListener('
     piece.classList.toggle('is-hidden', filter !== 'all' && !kinds.includes(filter));
   });
 }));
+
+// V11: discourage casual image saving without placing a watermark over the art.
+document.addEventListener('contextmenu', e => {
+  if (e.target.closest('.art-button img, #viewer-image')) e.preventDefault();
+});
+document.addEventListener('dragstart', e => {
+  if (e.target.closest('.art-button img, #viewer-image')) e.preventDefault();
+});

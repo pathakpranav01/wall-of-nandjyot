@@ -58,3 +58,9 @@ html:fullscreen,html:-webkit-full-screen{background:#070707}
 html:fullscreen body,html:-webkit-full-screen body{background:#070707}
 html:fullscreen .viewer,html:-webkit-full-screen .viewer{width:100%;height:100%;min-height:100%;inset:0}
 html:fullscreen .viewer-stage,html:-webkit-full-screen .viewer-stage{height:100%;min-height:100%;padding:max(10px,env(safe-area-inset-top)) max(10px,env(safe-area-inset-right)) max(10px,env(safe-area-inset-bottom)) max(10px,env(safe-area-inset-left))}
+
+
+/* V12 paired immersive controls: close + authorship */
+.viewer-copyright{position:fixed;z-index:2147483647;left:max(18px,env(safe-area-inset-left));bottom:max(18px,env(safe-area-inset-bottom));padding:9px 13px;border-radius:999px;background:rgba(0,0,0,.48);color:rgba(255,255,255,.92);font:400 13px/1 Georgia,"Times New Roman",serif;letter-spacing:.035em;opacity:0;visibility:hidden;pointer-events:none;transform:translateY(4px);transition:opacity .22s ease,transform .22s ease,visibility 0s linear .22s;user-select:none;-webkit-user-select:none}
+.viewer.controls-visible .viewer-copyright{opacity:1;visibility:visible;transform:translateY(0);transition:opacity .22s ease,transform .22s ease,visibility 0s}
+@media(prefers-reduced-motion:reduce){.viewer-copyright{transition:none}}
