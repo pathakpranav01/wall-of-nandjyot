@@ -170,3 +170,36 @@ document.addEventListener('contextmenu', e => {
 document.addEventListener('dragstart', e => {
   if (e.target.closest('.art-button img, #viewer-image')) e.preventDefault();
 });
+
+// V14: make gallery loading feel invisible.
+// After the initial viewport has loaded, gently prefetch the remaining artwork
+// so a fast scroll is much less likely to catch unloaded tiles.
+function warmGalleryImages() {
+  const images = [...document.querySelectorAll('.art-button img')];
+  const pending = images.filter(img => !img.complete);
+
+  let index = 0;
+  const warmNext = () => {
+    if (index >= pending.length) return;
+    const img = pending[index++];
+    const src = img.getAttribute('src');
+    if (src) {
+      const preloader = new Image();
+      preloader.decoding = 'async';
+      preloader.src = src;
+      preloader.onload = preloader.onerror = () => {
+        // Stagger requests slightly so we do not compete with the first screen.
+        setTimeout(warmNext, 45);
+      };
+    } else {
+      warmNext();
+    }
+  };
+  warmNext();
+}
+
+if ('requestIdleCallback' in window) {
+  requestIdleCallback(warmGalleryImages, { timeout: 1200 });
+} else {
+  window.addEventListener('load', () => setTimeout(warmGalleryImages, 350), { once: true });
+}
