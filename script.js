@@ -4,6 +4,7 @@ const vimg = document.querySelector('#viewer-image');
 const closeButton = document.querySelector('#close');
 let controlsTimer;
 let retryingViewerImage = false;
+let viewerHistoryEntry = false;
 
 function showControls(autoHide = true) {
   viewer.classList.add('controls-visible');
@@ -16,41 +17,79 @@ function hideControls() {
   viewer.classList.remove('controls-visible');
 }
 
+function fullscreenElement() {
+  return document.fullscreenElement || document.webkitFullscreenElement || null;
+}
+
 async function enterFullscreen() {
-  const target = viewer;
-  const request = target.requestFullscreen || target.webkitRequestFullscreen;
-  if (!request) return;
+  // Request fullscreen for the whole document, not just the artwork overlay.
+  // This is the most reliable way to ask Android/desktop browsers to remove
+  // their browser chrome while our fixed viewer is visible.
+  const target = document.documentElement;
   try {
-    await request.call(target, { navigationUI: 'hide' });
+    if (target.requestFullscreen) {
+      await target.requestFullscreen({ navigationUI: 'hide' });
+      return true;
+    }
+    if (target.webkitRequestFullscreen) {
+      target.webkitRequestFullscreen();
+      return true;
+    }
   } catch (_) {
-    // Some mobile browsers (notably iPhone Safari) do not allow element fullscreen.
-    // The dialog already provides a full-viewport fallback.
+    // iPhone/iPad browsers and some embedded/mobile browsers can refuse
+    // element fullscreen. The fixed, full-viewport viewer remains the fallback.
   }
+  return false;
 }
 
 async function exitFullscreen() {
-  const fullscreenElement = document.fullscreenElement || document.webkitFullscreenElement;
-  if (!fullscreenElement) return;
-  const exit = document.exitFullscreen || document.webkitExitFullscreen;
-  if (exit) {
-    try { await exit.call(document); } catch (_) {}
-  }
+  if (!fullscreenElement()) return;
+  try {
+    if (document.exitFullscreen) await document.exitFullscreen();
+    else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+  } catch (_) {}
 }
 
 async function openViewer(image) {
   retryingViewerImage = false;
   vimg.src = image.currentSrc || image.src;
   vimg.alt = image.alt;
-  viewer.showModal();
+  viewer.hidden = false;
+  viewer.setAttribute('aria-hidden', 'false');
+  document.body.classList.add('viewer-open');
   showControls(true);
+
+  // Add one history entry so the browser/Android Back action closes the art
+  // instead of unexpectedly navigating away from the gallery.
+  if (!viewerHistoryEntry) {
+    history.pushState({ artworkViewer: true }, '', location.href);
+    viewerHistoryEntry = true;
+  }
+
+  // Keep this request in the original click gesture path. Browsers require
+  // a user activation before they will enter genuine fullscreen.
   await enterFullscreen();
 }
 
-async function closeViewer() {
+async function finishCloseViewer() {
   clearTimeout(controlsTimer);
   await exitFullscreen();
-  if (viewer.open) viewer.close();
+  viewer.hidden = true;
+  viewer.setAttribute('aria-hidden', 'true');
+  document.body.classList.remove('viewer-open');
   vimg.removeAttribute('src');
+  hideControls();
+}
+
+async function closeViewer({ fromHistory = false } = {}) {
+  if (viewer.hidden) return;
+  if (!fromHistory && viewerHistoryEntry) {
+    viewerHistoryEntry = false;
+    history.back();
+    return;
+  }
+  viewerHistoryEntry = false;
+  await finishCloseViewer();
 }
 
 document.querySelectorAll('.art-button').forEach(button => {
@@ -62,7 +101,7 @@ closeButton.addEventListener('click', e => {
   closeViewer();
 });
 
-// A tap on the artwork/stage reveals or hides the unobtrusive close control.
+// First tap can reveal the unobtrusive close control; another tap hides it.
 stage.addEventListener('click', () => {
   if (viewer.classList.contains('controls-visible')) hideControls();
   else showControls(true);
@@ -76,11 +115,23 @@ viewer.addEventListener('click', e => {
 });
 
 document.addEventListener('keydown', e => {
-  if (e.key === 'Escape' && viewer.open) closeViewer();
+  if (e.key === 'Escape' && !viewer.hidden) closeViewer();
 });
 
-// If a browser momentarily fails to decode/fetch a gallery image, retry it once
-// with a cache-busting query instead of leaving a broken-image/question-mark tile.
+window.addEventListener('popstate', () => {
+  if (!viewer.hidden) closeViewer({ fromHistory: true });
+});
+
+// If fullscreen is exited by the browser gesture/OS control, keep the viewer
+// open in its clean full-viewport fallback rather than closing the artwork.
+document.addEventListener('fullscreenchange', () => {
+  if (!viewer.hidden && !fullscreenElement()) viewer.classList.add('fullscreen-fallback');
+});
+document.addEventListener('webkitfullscreenchange', () => {
+  if (!viewer.hidden && !fullscreenElement()) viewer.classList.add('fullscreen-fallback');
+});
+
+// If a browser momentarily fails to decode/fetch a gallery image, retry once.
 document.querySelectorAll('.art-button img').forEach(image => {
   image.addEventListener('error', () => {
     if (image.dataset.retried === 'true') return;

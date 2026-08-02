@@ -23,8 +23,8 @@ h1{margin:0 0 17px;line-height:.98;font-weight:400;letter-spacing:-.04em;display
 .art-button img{display:block;width:auto;max-width:100%;height:auto;max-height:78vh;object-fit:contain;object-position:center;background:transparent}
 .piece.landscape .art-button img{width:100%;max-width:100%}
 footer{width:min(calc(100% - 48px),var(--max));margin:auto;padding:24px 0;border-top:1px solid var(--line);color:var(--muted);font-size:12px}
-dialog{width:100vw;height:100dvh;max-width:none;max-height:none;margin:0;padding:0;border:0;background:#070707}
-dialog::backdrop{background:#070707}
+.viewer{width:100vw;height:100dvh;max-width:none;max-height:none;margin:0;padding:0;border:0;background:#070707}
+.viewer::backdrop{background:#070707}
 .viewer-stage{width:100%;height:100dvh;display:flex;align-items:center;justify-content:center;padding:max(18px,env(safe-area-inset-top)) max(18px,env(safe-area-inset-right)) max(18px,env(safe-area-inset-bottom)) max(18px,env(safe-area-inset-left));overflow:auto}
 .viewer-stage img{display:block;max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain}
 .close{position:fixed;z-index:2;top:max(14px,env(safe-area-inset-top));right:max(18px,env(safe-area-inset-right));border:0;background:rgba(0,0,0,.48);color:#fff;width:44px;height:44px;border-radius:50%;font-size:29px;line-height:1;cursor:pointer}
@@ -41,8 +41,20 @@ dialog::backdrop{background:#070707}
 
 /* V9 immersive viewer controls */
 .close{opacity:0;visibility:hidden;pointer-events:none;transform:scale(.92);transition:opacity .22s ease,transform .22s ease,visibility 0s linear .22s}
-dialog.controls-visible .close{opacity:1;visibility:visible;pointer-events:auto;transform:scale(1);transition:opacity .22s ease,transform .22s ease,visibility 0s}
+.viewer.controls-visible .close{opacity:1;visibility:visible;pointer-events:auto;transform:scale(1);transition:opacity .22s ease,transform .22s ease,visibility 0s}
 .viewer-stage{cursor:none;-webkit-tap-highlight-color:transparent;overscroll-behavior:contain}
-dialog.controls-visible .viewer-stage{cursor:default}
+.viewer.controls-visible .viewer-stage{cursor:default}
 .viewer-stage img{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 @media(prefers-reduced-motion:reduce){.close{transition:none}}
+
+/* V10 genuine-fullscreen viewer */
+body.viewer-open{overflow:hidden;overscroll-behavior:none}
+.viewer[hidden]{display:none!important}
+.viewer{position:fixed;z-index:2147483647;inset:0;width:100vw;height:100dvh;margin:0;padding:0;border:0;background:#070707;overscroll-behavior:none;touch-action:manipulation}
+.viewer-stage{width:100%;height:100%;min-height:100dvh;display:flex;align-items:center;justify-content:center;padding:max(10px,env(safe-area-inset-top)) max(10px,env(safe-area-inset-right)) max(10px,env(safe-area-inset-bottom)) max(10px,env(safe-area-inset-left));overflow:hidden}
+.viewer-stage img{display:block;max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain}
+.viewer .close{z-index:2147483647}
+html:fullscreen,html:-webkit-full-screen{background:#070707}
+html:fullscreen body,html:-webkit-full-screen body{background:#070707}
+html:fullscreen .viewer,html:-webkit-full-screen .viewer{width:100%;height:100%;min-height:100%;inset:0}
+html:fullscreen .viewer-stage,html:-webkit-full-screen .viewer-stage{height:100%;min-height:100%;padding:max(10px,env(safe-area-inset-top)) max(10px,env(safe-area-inset-right)) max(10px,env(safe-area-inset-bottom)) max(10px,env(safe-area-inset-left))}
