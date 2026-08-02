@@ -2,6 +2,7 @@ const viewer = document.querySelector('#viewer');
 const stage = document.querySelector('.viewer-stage');
 const vimg = document.querySelector('#viewer-image');
 const closeButton = document.querySelector('#close');
+const immerseHint = document.querySelector('#immerse-hint');
 let controlsTimer;
 let retryingViewerImage = false;
 let viewerHistoryEntry = false;
@@ -51,6 +52,8 @@ async function exitFullscreen() {
 }
 
 async function openViewer(image) {
+  // Once a visitor has discovered the immersive viewer, the invitation has done its job.
+  if (immerseHint) immerseHint.classList.add('is-dismissed');
   retryingViewerImage = false;
   vimg.src = image.currentSrc || image.src;
   vimg.alt = image.alt;

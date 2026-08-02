@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Eagle+Lake&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=12">
+  <link rel="stylesheet" href="styles.css?v=13">
 </head>
 <body>
 <header class="site-header">
@@ -23,8 +23,10 @@
   </nav>
 </header>
 
+<div id="immerse-hint" class="immerse-hint" role="note">Tap an artwork to immerse</div>
+
 <main class="wall">
-  <!-- V12: one continuous journey across the complete gallery -->
+  <!-- V13: one continuous journey across the complete gallery -->
   <!-- light → wonder → openness → solitude → reflection → twilight → darkness → words → fire → sanctuary → light -->
   <article class="piece" data-kind="photos"><button class="art-button" aria-label="Open artwork: Light in Shadows"><img src="assets/light-in-shadows.png" loading="eager" decoding="async" alt="Light and shadows reflected across a dark interior"></button></article>
   <article class="piece" data-kind="photos"><button class="art-button" aria-label="Open artwork: Floating Form"><img src="assets/floating-form-water.png" loading="eager" decoding="async" alt="A geometric form and its shadow floating in blue water"></button></article>
@@ -46,11 +48,11 @@
   <article class="piece" data-kind="words"><button class="art-button" aria-label="Open Marathi poem in a sunlit room"><img src="assets/sunlit-room-poem.png" loading="lazy" decoding="async" alt="Marathi poem in a warm sunlit room with a small plant"></button></article>
 </main>
 
-<footer>© Wall of Nandjyot · All artwork and writing reserved</footer>
+<footer>© Nandjyot · All artwork and writing reserved</footer>
 <div id="viewer" class="viewer" hidden aria-hidden="true" role="dialog" aria-modal="true" aria-label="Artwork viewer">
   <button id="close" class="close" aria-label="Close artwork">×</button>
   <div class="viewer-copyright" aria-hidden="true">© Nandjyot</div>
   <div class="viewer-stage"><img id="viewer-image" alt=""></div>
 </div>
-<script src="script.js?v=12"></script>
+<script src="script.js?v=13"></script>
 </body></html>
