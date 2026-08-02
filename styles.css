@@ -38,3 +38,11 @@ dialog::backdrop{background:#070707}
 }
 @media(min-width:821px) and (max-width:1100px){.wall{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+
+/* V9 immersive viewer controls */
+.close{opacity:0;visibility:hidden;pointer-events:none;transform:scale(.92);transition:opacity .22s ease,transform .22s ease,visibility 0s linear .22s}
+dialog.controls-visible .close{opacity:1;visibility:visible;pointer-events:auto;transform:scale(1);transition:opacity .22s ease,transform .22s ease,visibility 0s}
+.viewer-stage{cursor:none;-webkit-tap-highlight-color:transparent;overscroll-behavior:contain}
+dialog.controls-visible .viewer-stage{cursor:default}
+.viewer-stage img{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+@media(prefers-reduced-motion:reduce){.close{transition:none}}
