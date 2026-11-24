@@ -1,4 +1,4 @@
-# Wall of Nandjyot — V16
+# Wall of Nandjyot — V17
 
 V12 treats the complete gallery as one continuous curated journey rather than a new collection followed by older work.
 
@@ -25,3 +25,6 @@ Gallery uses responsive WebP previews; original assets are unchanged and loaded 
 
 ## V16
 Show cached preview immediately, then replace with decoded original. Failed original requests retain preview. Warm responsive previews in batches of two after page load, pause new batches during immersive viewing, skip on data-saving or 2G connections. No speculative original downloads.
+
+## V17
+After the first preview settles (or a three-second fallback), promote all visible-category lazy previews to eager with normal priority. Browser manages concurrency. Skip speculative loading on data-saving/2G connections; resume when returning to the gallery or changing filters. Immersive viewer and assets unchanged.

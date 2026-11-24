@@ -173,25 +173,33 @@ document.addEventListener('dragstart', e => {
 });
 
 
-// Warm responsive previews only, two at a time, after the initial load.
+// V17: promote all responsive previews after the first visible artwork settles.
+// No detached image requests, batch barriers or speculative original downloads.
 const galleryImages = [...document.querySelectorAll('.art-button img')];
-let warming = false;
-async function warmPreviews() {
-  if (warming || navigator.connection?.saveData || /2g$/.test(navigator.connection?.effectiveType || '')) return;
-  if (document.hidden || !viewer.hidden) { setTimeout(warmPreviews, 1000); return; }
-  const batch = galleryImages.filter(img => img.loading === 'lazy' && !img.closest('.piece').classList.contains('is-hidden')).slice(0, 2);
-  if (!batch.length) return;
-  warming = true;
-  await Promise.all(batch.map(img => new Promise(resolve => {
-    let timer;
-    const done = () => { clearTimeout(timer); img.removeEventListener('load', done); img.removeEventListener('error', done); resolve(); };
-    img.addEventListener('load', done); img.addEventListener('error', done);
-    timer = setTimeout(done, 12000);
-    img.fetchPriority = 'low'; img.loading = 'eager';
-    if (img.complete && img.naturalWidth) done();
-  })));
-  warming = false;
-  setTimeout(warmPreviews, 300);
+const connection = navigator.connection;
+function warmPreviews() {
+  if (document.hidden || !viewer.hidden || connection?.saveData || /2g$/.test(connection?.effectiveType || '')) return;
+  for (const img of galleryImages) {
+    if (img.loading !== 'lazy' || img.closest('.piece').classList.contains('is-hidden')) continue;
+    img.fetchPriority = 'auto';
+    img.loading = 'eager';
+  }
 }
-window.addEventListener('load', () => setTimeout(warmPreviews, 700), {once:true});
-document.querySelectorAll('.filter').forEach(button => button.addEventListener('click', () => setTimeout(warmPreviews, 700)));
+let initialReady = false;
+function startWarming() {
+  if (initialReady) return;
+  initialReady = true;
+  warmPreviews();
+}
+const firstPreview = galleryImages[0];
+if (!firstPreview || firstPreview.complete) startWarming();
+else {
+  firstPreview.addEventListener('load', startWarming, {once:true});
+  firstPreview.addEventListener('error', startWarming, {once:true});
+  // A stalled first image must not indefinitely block the rest.
+  setTimeout(startWarming, 3000);
+}
+document.addEventListener('visibilitychange', () => { if (initialReady) warmPreviews(); });
+connection?.addEventListener?.('change', () => { if (initialReady) warmPreviews(); });
+document.querySelectorAll('.filter').forEach(button => button.addEventListener('click', () => { if (initialReady) warmPreviews(); }));
+new MutationObserver(() => { if (initialReady && viewer.hidden) warmPreviews(); }).observe(viewer, {attributes:true, attributeFilter:['hidden']});
