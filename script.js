@@ -4,7 +4,7 @@ const vimg = document.querySelector('#viewer-image');
 const closeButton = document.querySelector('#close');
 const immerseHint = document.querySelector('#immerse-hint');
 let controlsTimer;
-let retryingViewerImage = false;
+let generation = 0;
 let viewerHistoryEntry = false;
 
 function showControls(autoHide = true) {
@@ -54,8 +54,15 @@ async function exitFullscreen() {
 async function openViewer(image) {
   // Once a visitor has discovered the immersive viewer, the invitation has done its job.
   if (immerseHint) immerseHint.classList.add('is-dismissed');
-  retryingViewerImage = false;
-  vimg.src = image.dataset.original || image.currentSrc || image.src;
+  const token = ++generation;
+  vimg.src = image.currentSrc || image.src;
+  const full = new Image();
+  full.fetchPriority = 'high';
+  full.onload = async () => {
+    try { if (full.decode) await full.decode(); } catch (_) { return; }
+    if (token === generation && !viewer.hidden) vimg.src = full.src;
+  };
+  full.src = image.dataset.original || vimg.src;
   vimg.alt = image.alt;
   viewer.hidden = false;
   viewer.setAttribute('aria-hidden', 'false');
@@ -75,6 +82,7 @@ async function openViewer(image) {
 }
 
 async function finishCloseViewer() {
+  ++generation;
   clearTimeout(controlsTimer);
   await exitFullscreen();
   viewer.hidden = true;
@@ -146,14 +154,6 @@ document.querySelectorAll('.art-button img').forEach(image => {
   });
 });
 
-vimg.addEventListener('error', () => {
-  if (retryingViewerImage || !vimg.src) return;
-  retryingViewerImage = true;
-  const url = new URL(vimg.src, window.location.href);
-  url.searchParams.set('retry', Date.now());
-  vimg.src = url.href;
-});
-
 document.querySelectorAll('.filter').forEach(button => button.addEventListener('click', () => {
   document.querySelectorAll('.filter').forEach(x => x.classList.remove('active'));
   button.classList.add('active');
@@ -172,3 +172,26 @@ document.addEventListener('dragstart', e => {
   if (e.target.closest('.art-button img, #viewer-image')) e.preventDefault();
 });
 
+
+// Warm responsive previews only, two at a time, after the initial load.
+const galleryImages = [...document.querySelectorAll('.art-button img')];
+let warming = false;
+async function warmPreviews() {
+  if (warming || navigator.connection?.saveData || /2g$/.test(navigator.connection?.effectiveType || '')) return;
+  if (document.hidden || !viewer.hidden) { setTimeout(warmPreviews, 1000); return; }
+  const batch = galleryImages.filter(img => img.loading === 'lazy' && !img.closest('.piece').classList.contains('is-hidden')).slice(0, 2);
+  if (!batch.length) return;
+  warming = true;
+  await Promise.all(batch.map(img => new Promise(resolve => {
+    let timer;
+    const done = () => { clearTimeout(timer); img.removeEventListener('load', done); img.removeEventListener('error', done); resolve(); };
+    img.addEventListener('load', done); img.addEventListener('error', done);
+    timer = setTimeout(done, 12000);
+    img.fetchPriority = 'low'; img.loading = 'eager';
+    if (img.complete && img.naturalWidth) done();
+  })));
+  warming = false;
+  setTimeout(warmPreviews, 300);
+}
+window.addEventListener('load', () => setTimeout(warmPreviews, 700), {once:true});
+document.querySelectorAll('.filter').forEach(button => button.addEventListener('click', () => setTimeout(warmPreviews, 700)));

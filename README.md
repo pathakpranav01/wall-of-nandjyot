@@ -1,4 +1,4 @@
-# Wall of Nandjyot — V15
+# Wall of Nandjyot — V16
 
 V12 treats the complete gallery as one continuous curated journey rather than a new collection followed by older work.
 
@@ -22,3 +22,6 @@ The first gallery works load immediately; remaining artworks are gently prefetch
 
 ## V15
 Gallery uses responsive WebP previews; original assets are unchanged and loaded on opening the viewer. First two previews eager, others lazy. Background prefetch removed. Explicit dimensions reserve layout. For new artworks generate 640px and 1280px width previews (maximum heights 1280/2560), add data-original, dimensions and sizing variables matching existing markup.
+
+## V16
+Show cached preview immediately, then replace with decoded original. Failed original requests retain preview. Warm responsive previews in batches of two after page load, pause new batches during immersive viewing, skip on data-saving or 2G connections. No speculative original downloads.
