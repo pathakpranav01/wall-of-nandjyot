@@ -71,3 +71,9 @@ html:fullscreen .viewer-stage,html:-webkit-full-screen .viewer-stage{height:100%
 .immerse-hint.is-dismissed{opacity:0;transform:translateY(-3px);max-height:0;margin-top:0;margin-bottom:0;pointer-events:none}
 @media(max-width:820px){.immerse-hint{width:calc(100% - 36px);margin-top:15px;margin-bottom:-12px}}
 @media(prefers-reduced-motion:reduce){.immerse-hint{transition:none}}
+
+/* V15: reserve artwork geometry before any image bytes arrive. */
+.art-button{width:min(100%, calc(var(--art-width) + 2 * clamp(12px,1.35vw,20px)))}
+.art-button img{width:100%;height:auto;max-height:none;aspect-ratio:var(--art-ratio)}
+@media(min-width:821px){.piece:not(.landscape) .art-button{width:min(100%, calc(min(var(--art-width), 78vh * var(--art-ratio)) + 2 * clamp(12px,1.35vw,20px)))}}
+.piece.landscape .art-button{width:100%}

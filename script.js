@@ -55,7 +55,7 @@ async function openViewer(image) {
   // Once a visitor has discovered the immersive viewer, the invitation has done its job.
   if (immerseHint) immerseHint.classList.add('is-dismissed');
   retryingViewerImage = false;
-  vimg.src = image.currentSrc || image.src;
+  vimg.src = image.dataset.original || image.currentSrc || image.src;
   vimg.alt = image.alt;
   viewer.hidden = false;
   viewer.setAttribute('aria-hidden', 'false');
@@ -141,6 +141,7 @@ document.querySelectorAll('.art-button img').forEach(image => {
     if (image.dataset.retried === 'true') return;
     image.dataset.retried = 'true';
     const original = image.getAttribute('src').split('?')[0];
+    image.removeAttribute('srcset');
     image.src = `${original}?retry=${Date.now()}`;
   });
 });
@@ -171,35 +172,3 @@ document.addEventListener('dragstart', e => {
   if (e.target.closest('.art-button img, #viewer-image')) e.preventDefault();
 });
 
-// V14: make gallery loading feel invisible.
-// After the initial viewport has loaded, gently prefetch the remaining artwork
-// so a fast scroll is much less likely to catch unloaded tiles.
-function warmGalleryImages() {
-  const images = [...document.querySelectorAll('.art-button img')];
-  const pending = images.filter(img => !img.complete);
-
-  let index = 0;
-  const warmNext = () => {
-    if (index >= pending.length) return;
-    const img = pending[index++];
-    const src = img.getAttribute('src');
-    if (src) {
-      const preloader = new Image();
-      preloader.decoding = 'async';
-      preloader.src = src;
-      preloader.onload = preloader.onerror = () => {
-        // Stagger requests slightly so we do not compete with the first screen.
-        setTimeout(warmNext, 45);
-      };
-    } else {
-      warmNext();
-    }
-  };
-  warmNext();
-}
-
-if ('requestIdleCallback' in window) {
-  requestIdleCallback(warmGalleryImages, { timeout: 1200 });
-} else {
-  window.addEventListener('load', () => setTimeout(warmGalleryImages, 350), { once: true });
-}
